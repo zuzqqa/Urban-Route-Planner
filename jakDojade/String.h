@@ -1,102 +1,184 @@
 #pragma once
+#include <iostream>
 #include <cstring>
 #include <cctype>
 
-class String
-{
-	char* arr;
-	int size;
+#define CRT_SECURE_NO_WARNINGS
+
+class string_ {
+	char* data_;
+	int size_;
 public:
-	String()
-		: size(0), arr(new char[1]) {
-		arr[0] = '\0';
-	};
+	string_();
 
-	String(const char* str) {
-		arr = nullptr;
-		size = 0;
+	string_(const char* str);
 
-		if (str != nullptr) {
-			int length = strlen(str);
+	string_& operator=(const string_& other);
 
-			char* strData = new char[length + 1];
+	string_& operator+(const string_& other) const;
 
-			for (size_t i = 0, j = 0; i < length; i++) {
-				if (str[i] != '\n') {
-					strData[j] = str[i];
+	void append(char c);
 
-					j++;
-					size++;
-				}
-			}
+	void flip();
 
-			strData[size] = '\0';
+	char& operator[](const int index) const;
 
-			arr = strData;
-		}
-		else { //default wartosci
-			arr = new char[1];
-			arr[0] = '\0';
-		}
-	};
+	bool operator==(const string_& other) const;
 
-	String substr(int buffer, int length) {
-		char* newString = new char[length + 1];
+	bool operator!=(const string_& other) const;
 
-		memcpy(newString, &arr[buffer], length);
+	[[nodiscard]] char* get_str() const;
 
-		newString[length] = '\0';
+	[[nodiscard]] int str_size() const;
 
-		return String(newString);
-	};
+	[[nodiscard]] string_ substr(const int buffer, const int length) const;
 
-	String& operator=(const String& other) {
-		if (this != &other) {
+	void str_delete();
 
-			if (arr != nullptr) {
-				arr = nullptr;
-			}
-
-			size = other.size;
-			arr = new char[size + 1];
-
-			memcpy_s(arr, size + 1, other.arr, size + 1);
-		}
-		return *this;
-	};
-
-	String& operator+(const String& other) const {
-		String result;
-
-		result.size = size + other.size;
-		result.arr = new char[result.size + 1];
-
-		strcpy(result.arr, arr);
-		strcat(result.arr, other.arr);
-
-		return result;
-	};
-
-	char& operator[](int index) const {
-		return arr[index];
-	};
-
-	bool operator==(const String& other) const {
-		return (size == other.size) && (strcmp(arr, other.arr) == 0);
-	};
-
-	bool operator!=(const String& other) const {
-		return !(*this == other);
-	};
-
-	void Sdelete() {
-		if (arr != nullptr) {
-			delete[] arr;
-
-			size = 0;
-			arr = new char[1];
-			arr[0] = '\0';
-		}
-	};
+	~string_();
 };
 
+inline string_::string_()
+{
+	data_ = new char[1];
+	size_ = 0;
+
+	data_[0] = '\0';
+}
+
+inline string_::string_(const char* str)
+{
+	data_ = nullptr;
+	size_ = 0;
+
+	if (str != nullptr) {
+		int length = strlen(str);
+
+		auto str_data = new char[length + 1];
+
+		for (size_t i = 0, j = 0; i < length; i++) {
+			if (str[i] != '\n') {
+				str_data[j] = str[i];
+
+				j++;
+				size_++;
+			}
+		}
+
+		str_data[size_] = '\0';
+
+		data_ = str_data;
+	}
+	else {
+		data_ = new char[1];
+		data_[0] = '\0';
+	}
+}
+
+inline string_& string_::operator=(const string_& other)
+{
+	if (this != &other) {
+
+		if (data_ != nullptr) {
+			data_ = nullptr;
+		}
+
+		size_ = other.size_;
+		data_ = new char[size_ + 1];
+
+		memcpy_s(data_, size_ + 1, other.data_, size_ + 1);
+	}
+	return *this;
+}
+
+inline void string_::append(const char c) {
+	auto str_data = new char[size_ + 2];
+
+	if(data_ != nullptr)
+	{
+		for(int i = 0; i < size_; i++)
+		{
+			str_data[i] = data_[i];
+		}
+		delete[] data_;
+	}
+
+	data_ = str_data;
+	data_[size_] = c;
+	data_[size_ + 1] = '\0';
+
+	size_++;
+}
+
+inline void string_::flip() {
+	auto str_data = new char[size_];
+
+	int j = 0;
+
+	if (data_ != nullptr)
+	{
+		for (int i = size_ - 1; i >= 0; i--)
+		{
+			str_data[j++] = data_[i];
+		}
+		delete[] data_;
+	}
+
+	data_ = str_data;
+	//data_[size_] = '\0';
+}
+
+
+inline char& string_::operator[](const int index) const
+{
+	return data_[index];
+}
+
+inline bool string_::operator==(const string_& other) const
+{
+	return (size_ == other.size_) && (strcmp(data_, other.data_) == 0);
+}
+
+inline bool string_::operator!=(const string_& other) const
+{
+	return !(*this == other);
+}
+
+inline char* string_::get_str() const
+{
+	return data_;
+}
+
+inline int string_::str_size() const
+{
+	return size_;
+}
+
+inline string_ string_::substr(const int buffer, const int length) const
+{
+	auto newString = new char[length + 1];
+
+	memcpy(newString, &data_[buffer], length);
+
+	newString[length] = '\0';
+
+	return {newString};
+}
+
+inline void string_::str_delete()
+{
+	if (data_ != nullptr) {
+		delete[] data_;
+
+		size_ = 0;
+		data_ = new char[1];
+		data_[0] = '\0';
+	}
+}
+
+inline string_::~string_()
+{
+	if (data_ != nullptr) {
+		data_ = nullptr;
+	}
+}

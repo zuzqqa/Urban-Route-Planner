@@ -8,6 +8,8 @@ int Parent(int i) { return (i - 1) / 2; }
 int Left(int i) { return i * 2 + 1; }
 int Right(int i) { return i * 2 + 2; }
 
+// customowe porownywanie bo struktury
+
 void Heapify(int* arr, int i, int size) {
 	int maxps;
 	int left = Left(i);
@@ -29,13 +31,13 @@ void Heapify(int* arr, int i, int size) {
 	}
 }
 
-void BulidHeap(int* arr, int size) {
+inline void bulid_heap(int* arr, int size) {
 	for (int i = size; i >= 0; i--) {
 		Heapify(arr, i, size);
 	}
 }
 
-int HeapInsert(int* arr, int size, int newEle) {
+inline int heap_insert(int* arr, int size, int newEle) {
 	size = size + 1;
 	int i = size;
 	while (i > 1 && arr[Parent(i) - 1] < newEle) {
@@ -45,18 +47,6 @@ int HeapInsert(int* arr, int size, int newEle) {
 	arr[i - 1] = newEle;
 
 	return size;
-}
-
-int HeapGetMax(int* arr, int size) {
-	int max = arr[0];
-
-	arr[0] = arr[size - 1];
-
-	size = size - 1;
-
-	Heapify(arr, size);
-	
-	return 
 }
 
 class PriorityQueue {

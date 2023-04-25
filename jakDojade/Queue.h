@@ -1,27 +1,38 @@
 #pragma once
 #include "Vector.h"
 
+using namespace std;
+
 template <typename T>
-class Queue {
-	Vector<T> arr;
+class queue {
+	Vector<T> arr_;
 public:
 	void push(const T& ele) {
-		arr.push(ele);
+		arr_.push(ele);
 	}
 
 	void pop() {
-		arr.pop_front();
+		arr_.pop_front();
 	}
 
-	T& front() const{
-		return arr[0];
+	T& operator[](int index) {
+		return arr_[index];
 	}
 
-	int size() const{
-		return arr.getSize();
+	[[nodiscard]] T& front() {
+		return arr_[0];
 	}
 
-	bool empty() const {
-		return arr.getEmpty();
+	[[nodiscard]] int size() {
+		return arr_.get_size();
 	}
+
+	[[nodiscard]] bool empty()  {
+		return arr_.get_empty();
+	}
+
+	friend ostream& operator << (ostream& os, const queue& atr) {
+		os << "Property: " << atr.arr_;
+		return os;
+	};
 };
