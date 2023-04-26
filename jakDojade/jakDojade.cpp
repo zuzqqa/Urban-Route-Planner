@@ -34,6 +34,7 @@ void bfs(const int n, const int m, const int* arr, Vector<Vector<edge>>& edges, 
   
     const int start_city = arr[i * m + j];
 
+
     queue<Pair> q;
 
     q.push({{i, j}, 0});
@@ -43,25 +44,25 @@ void bfs(const int n, const int m, const int* arr, Vector<Vector<edge>>& edges, 
         auto [location, distance] = q.front();
         auto [x, y] = location;
 
+        q.pop();
+
         // town
         if (arr[x * m + y] >= 0 && arr[x * m + y] != start_city) {
+            cout << edges[start_city].get_size() << endl;
             edges[start_city].push({ arr[x * m + y], distance });
+            //std::cout << distance << endl;
             continue;
         }
 
-        for (int i = 0; i < shift_size; i++)
+        for (int k = 0; k < shift_size; k++)
         {
-            if ((dy[i] >= 0 && dy[i] < m && dx[i] >= 0 && dx[i] < n) && arr[(x + dx[i]) * m + (y + dy[i])] != -2)
+            if ((dy[k] >= 0 && dy[k] < m && dx[k] >= 0 && dx[k] < n) && arr[(x + dx[k]) * m + (y + dy[k])] != -2)
             {
-                q.push({ {x + dx[i], y + dy[i]}, distance + 1 });
-                explored[(x + dx[i]) * m + (y + dy[i])] = true;
+                //cout << distance << endl;
+                q.push({ {x + dx[k], y + dy[k]}, distance + 1 });
+                explored[(x + dx[k]) * m + (y + dy[k])] = true;
             }
         }
-    }
-
-    for( int i = 0; i < q.size(); i++)
-    {
-        cout << q[i].distance << " " << q[i].location.x << q[i].location.y;
     }
 
     return;
@@ -164,12 +165,42 @@ int main()
         }
     }
 
-   for (int i = 0; i < n; i++) {
+   /*for (int i = 0; i < n; i++) {
    		for (int j = 0; j < m; j++) {
-            bfs(n, m, arr1, edges, i, j);
    			cout << arr1[i * m + j];
    		}
    		cout << endl;
-   }
+   }*/
+
+    Vector<int> as;
+
+   /* as.push(12);
+    as.push(12);
+    as.push(12);
+
+    as.pop_front();
+    as.pop_front();
+    as.pop_front();
+
+    as.push(12);
+
+    as.print();*/
+
+    for( int i = 0; i < m; i++)
+    {
+	    for( int j = 0; j < n; j++)
+	    {
+            if(arr[i*m + j] == '*')
+            bfs(n, m, arr1, edges, i, j);
+	    }
+    }
+
+   /* for( int i = 0; i < n; i++)
+    {
+	    for(int j = 0; j < m; j++)
+	    {
+            cout << ;
+	    }
+    }*/
 }
 

@@ -33,6 +33,8 @@ public:
 
 	void print();
 
+	void reserve(int new_capacity);
+
 	[[nodiscard]] int get_size() const;
 
 	[[nodiscard]] int get_capacity() const;
@@ -64,7 +66,7 @@ public:
 // functions for vector
 
 template <typename T>
-Vector<T>::Vector(): capacity_(1), size_(0), arr_(new T[1])
+Vector<T>::Vector(): capacity_(10), size_(0), arr_(new T[10])
 {}
 
 template <typename T>
@@ -101,7 +103,11 @@ Vector<T>::Vector(Vector&& second): capacity_(std::move(second.capacity_)), size
 
 template <typename T>
 Vector<T>::~Vector()
-{ delete[] arr_; }
+{
+	delete[] arr_;
+	size_ = 0;
+	capacity_ = 1;
+}
 
 template <typename T>
 T& Vector<T>::operator[](int index)
@@ -134,15 +140,11 @@ void Vector<T>::pop()
 template <typename T>
 void Vector<T>::pop_front()
 {
-	T* temp = new T[capacity_-1];
+	if (size_ == 0) return;
 
-	for (int i = 1; i < size_; i++) {
-		temp[i - 1] = arr_[i];
+	for (int i = 0; i < size_ - 1; i++) {
+		arr_[i] = arr_[i + 1];
 	}
-
-	delete[] arr_;
-
-	arr_ = temp;
 
 	size_--;
 }
@@ -150,23 +152,31 @@ void Vector<T>::pop_front()
 template <typename T>
 void Vector<T>::push(T data)
 {
-	if (size_ == capacity_) {
+
+	if (size_ >= capacity_) {
+		cout << capacity_ << endl;
+
+		if (capacity_ == 10) {
+			cout << "Error: Vector capacity reached its maximum limit." << endl;
+			return;
+		}
+
 		T* temp = new T[2 * capacity_];
 
 		for (int i = 0; i < size_; i++) {
 			temp[i] = arr_[i];
 		}
 
-		delete[] arr_;
-
 		capacity_ = capacity_ * 2;
-		arr_ = temp;
+
+		swap(arr_, temp);
+
+		delete[] temp;
 	}
 
 	// push data at the back
 
-	arr_[size_] = data;
-	size_++;
+	arr_[size_++] = data;
 }
 
 template <typename T>
@@ -174,6 +184,21 @@ void Vector<T>::print()
 {
 	for (int i = 0; i < size_; i++) {
 		cout << arr_[i] << " ";
+	}
+}
+
+template <typename T>
+void Vector<T>::reserve(int new_capacity) {
+	if (new_capacity > capacity_) {
+
+		T* new_data = new T[new_capacity];
+		if (arr_) {
+			std::copy(arr_, arr_ + size_, new_data);
+			delete[] arr_;
+		}
+
+		arr_ = new_data;
+		capacity_ = new_capacity;
 	}
 }
 

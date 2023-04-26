@@ -113,10 +113,10 @@ inline void string_::append(const char c) {
 inline void string_::flip() {
 	auto str_data = new char[size_];
 
-	int j = 0;
-
 	if (data_ != nullptr)
 	{
+		int j = 0;
+
 		for (int i = size_ - 1; i >= 0; i--)
 		{
 			str_data[j++] = data_[i];
@@ -125,7 +125,6 @@ inline void string_::flip() {
 	}
 
 	data_ = str_data;
-	//data_[size_] = '\0';
 }
 
 
