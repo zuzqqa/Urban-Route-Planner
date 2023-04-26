@@ -13,6 +13,8 @@ public:
 
 	Vector(const int size, const T& value);
 
+	Vector(const int size);
+
 	Vector(const Vector& second);
 
 	Vector(Vector&& second);
@@ -22,6 +24,16 @@ public:
 	// assignment operators
 
 	T& operator[](int index);
+
+	T& operator[](int index) const;
+
+	bool operator==(const Vector& other) {
+		return this->arr_ == other.arr_ && this->size_ == other.size_ && this->capacity_ == other.capacity_;
+	}
+
+	bool operator!= (const Vector& other) {
+		return !this->operator==(other);
+	}
 
 	Vector& operator=(const Vector& second);
 
@@ -77,6 +89,14 @@ Vector<T>::Vector(const int size, const T& value): capacity_(size), size_(size),
 	}
 }
 
+template<typename T>
+inline Vector<T>::Vector(const int size)
+{
+	this->arr_ = new T[size];
+	this->capacity_ = size;
+	this->size_ = size;
+}
+
 template <typename T>
 Vector<T>::Vector(const Vector& second)
 {
@@ -115,10 +135,16 @@ T& Vector<T>::operator[](int index)
 	return arr_[index];
 }
 
+template<typename T>
+inline T& Vector<T>::operator[](int index) const
+{
+	return this->arr_[index];
+}
+
 template <typename T>
 Vector<T>& Vector<T>::operator=(const Vector& second)
 {
-	if (this != second) {
+	if (*this != second) {
 
 		size_ = second.size_;
 		capacity_ = second.capacity_;
@@ -241,7 +267,7 @@ Vector<T>::Iterator::Iterator(const Vector<T>* current_, int index_)
 template <typename T>
 const T& Vector<T>::Iterator::operator*() const
 {
-	return current_->operator[](index_);
+	return current_[index_];
 }
 
 template <typename T>
