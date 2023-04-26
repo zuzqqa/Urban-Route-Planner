@@ -34,6 +34,7 @@ void bfs(const int n, const int m, const int* arr, Vector<Vector<edge>>& edges, 
   
     const int start_city = arr[i * m + j];
 
+    edges.reserve(m * n);
 
     queue<Pair> q;
 
@@ -59,6 +60,7 @@ void bfs(const int n, const int m, const int* arr, Vector<Vector<edge>>& edges, 
             if ((dy[k] >= 0 && dy[k] < m && dx[k] >= 0 && dx[k] < n) && arr[(x + dx[k]) * m + (y + dy[k])] != -2)
             {
                 //cout << distance << endl;
+                edges.push(Vector<edge>());
                 q.push({ {x + dx[k], y + dy[k]}, distance + 1 });
                 explored[(x + dx[k]) * m + (y + dy[k])] = true;
             }
