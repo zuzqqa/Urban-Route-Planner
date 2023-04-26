@@ -4,7 +4,6 @@
 #include "String.h"
 #include "Queue.h"
 
-constexpr int shift_size = 3;
 constexpr int dx[] = { 0, 1, 0, -1 };
 constexpr int dy[] = { 1, 0, -1, 0 };
 
@@ -34,8 +33,16 @@ bool inside_map(const int i, const int j, const int w, const int h) {
 
 // :D
 void bfs(const int n, const int m, const Vector<int>& arr, Vector<Vector<edge>>& edges, const int i, const int j) {
-    Vector explored(m * n, false);
-  
+    Vector<bool> explored(n * m);
+
+    for(int i1 = 0; i1 < n; i1++)
+    {
+	    for(int j1 = 0; j1 < m; j1++)
+	    {
+            explored[i1 * m + j1] = false;
+	    }
+    }
+
     const int start_city = arr[i * m + j];
 
     edges.reserve(m * n);
@@ -43,7 +50,13 @@ void bfs(const int n, const int m, const Vector<int>& arr, Vector<Vector<edge>>&
     queue<Pair> q;
 
     q.push({{i, j}, 0});
-    explored[i * m + j] = true;
+    explored[i * n + j] = true;
+
+    Vector<edge> empty;
+
+    for (int o = 0; o < m * n; o++) {
+        edges.push(Vector<edge>());
+    }
 
     while (!q.empty()) {
         auto [location, distance] = q.front();
@@ -53,37 +66,21 @@ void bfs(const int n, const int m, const Vector<int>& arr, Vector<Vector<edge>>&
 
         // town
         if (arr[x * m + y] >= 0 && arr[x * m + y] != start_city) {
-            //cout << "City found" << endl;
-            cout << edges[start_city].get_size() << endl;
+            cout << "City found" << endl;
             edges[start_city].push({ arr[x * m + y], distance });
-            //std::cout << distance << endl;
             continue;
         }
 
         for (int k = 0; k < 4; k++) {
-            const int new_i = y + dy[k];
-            const int new_j = x + dx[k];
+            const int new_i = x + dx[k];
+            const int new_j = y + dy[k];
             if (!inside_map(new_i, new_j, n, m)) continue;
             if (arr[new_i * m + new_j] == -2) continue;
             if (explored[new_i * m + new_j]) continue;
 
-            const auto res = arr[new_i * m + new_j];
-
             q.push({ {new_i, new_j}, distance + 1 });
             explored[new_i * m + new_j] = true;
         }
-
-
-        //for (int k = 0; k < shift_size; k++)
-        //{
-        //    if ((dy[k] >= 0 && dy[k] < m && dx[k] >= 0 && dx[k] < n) && arr[(x + dx[k]) * m + (y + dy[k])] != -2)
-        //    {
-        //        //cout << distance << endl;
-        //        edges.push(Vector<edge>());
-        //        q.push({ {x + dx[k], y + dy[k]}, distance + 1 });
-        //        explored[(x + dx[k]) * m + (y + dy[k])] = true;
-        //    }
-        //}
     }
 
     return;
@@ -122,9 +119,7 @@ string_ name(const int n, const int m, const char* arr, const int i, int j)
 
 void get_city_name(const int n, const int m, const char* arr)
 {
-    string_ city_name;
-
-    for (int i = 0; i < n; i++) {
+	for (int i = 0; i < n; i++) {
         for (int j = 0; j < m; j++) {
             if (arr[i * m + j] == '*')
             {
@@ -134,11 +129,10 @@ void get_city_name(const int n, const int m, const char* arr)
                     {
                         if ((j1 >= 0 && j1 < m && i1 >= 0 && i1 < n) && isalnum(arr[i1 * m + j1]))
                         {
-                           city_name = name(n, m, arr, i1, j1);
+                           string_ city_name = name(n, m, arr, i1, j1);
                         } 
                     }
                 }
-               // cout << city_name.get_str() << endl;
             }
         }
     }
@@ -191,24 +185,13 @@ int main()
         }
     }
 
-   //for (int i = 0; i < n; i++) {
-   //		for (int j = 0; j < m; j++) {
-   //			cout << normal_array[i * m + j] << " ";
-   //		}
-   //		cout << endl;
-   //}
-
-   /* as.push(12);
-    as.push(12);
-    as.push(12);
-
-    as.pop_front();
-    as.pop_front();
-    as.pop_front();
-
-    as.push(12);
-
-    as.print();*/
+    cout << arr1[3 * m + 8] << endl;
+   for (int i = 0; i < n; i++) {
+   		for (int j = 0; j < m; j++) {
+   			cout << normal_array[i * m + j] << " ";
+   		}
+   		cout << endl;
+   }
 
     for( int i = 0; i < m; i++)
     {
@@ -231,13 +214,5 @@ int main()
 
         cout << endl;
     }
-
-   /* for( int i = 0; i < n; i++)
-    {
-	    for(int j = 0; j < m; j++)
-	    {
-            cout << ;
-	    }
-    }*/
 }
 

@@ -5,8 +5,8 @@ using namespace std;
 template <typename T>
 class Vector
 {
-	int capacity_;
-	int size_;
+	int capacity_{};
+	int size_{};
 	T* arr_;
 public:
 	Vector();
@@ -182,11 +182,6 @@ void Vector<T>::push(T data)
 	if (size_ >= capacity_) {
 		cout << capacity_ << endl;
 
-		if (capacity_ == 10) {
-			cout << "Error: Vector capacity reached its maximum limit." << endl;
-			return;
-		}
-
 		T* temp = new T[2 * capacity_];
 
 		for (int i = 0; i < size_; i++) {
@@ -202,7 +197,8 @@ void Vector<T>::push(T data)
 
 	// push data at the back
 
-	arr_[size_++] = data;
+	arr_[size_] = data;
+	size_++;
 }
 
 template <typename T>
