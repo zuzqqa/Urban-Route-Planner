@@ -28,8 +28,12 @@ struct Pair {
     int distance;
 };
 
+bool inside_map(const int i, const int j, const int w, const int h) {
+    return i >= 0 && j >= 0 && j < w && i < h;
+}
+
 // :D
-void bfs(const int n, const int m, const int* arr, Vector<Vector<edge>>& edges, const int i, const int j) {
+void bfs(const int n, const int m, const Vector<int>& arr, Vector<Vector<edge>>& edges, const int i, const int j) {
     Vector explored(m * n, false);
   
     const int start_city = arr[i * m + j];
@@ -49,22 +53,37 @@ void bfs(const int n, const int m, const int* arr, Vector<Vector<edge>>& edges, 
 
         // town
         if (arr[x * m + y] >= 0 && arr[x * m + y] != start_city) {
+            //cout << "City found" << endl;
             cout << edges[start_city].get_size() << endl;
             edges[start_city].push({ arr[x * m + y], distance });
             //std::cout << distance << endl;
             continue;
         }
 
-        for (int k = 0; k < shift_size; k++)
-        {
-            if ((dy[k] >= 0 && dy[k] < m && dx[k] >= 0 && dx[k] < n) && arr[(x + dx[k]) * m + (y + dy[k])] != -2)
-            {
-                //cout << distance << endl;
-                edges.push(Vector<edge>());
-                q.push({ {x + dx[k], y + dy[k]}, distance + 1 });
-                explored[(x + dx[k]) * m + (y + dy[k])] = true;
-            }
+        for (int k = 0; k < 4; k++) {
+            const int new_i = y + dy[k];
+            const int new_j = x + dx[k];
+            if (!inside_map(new_i, new_j, n, m)) continue;
+            if (arr[new_i * m + new_j] == -2) continue;
+            if (explored[new_i * m + new_j]) continue;
+
+            const auto res = arr[new_i * m + new_j];
+
+            q.push({ {new_i, new_j}, distance + 1 });
+            explored[new_i * m + new_j] = true;
         }
+
+
+        //for (int k = 0; k < shift_size; k++)
+        //{
+        //    if ((dy[k] >= 0 && dy[k] < m && dx[k] >= 0 && dx[k] < n) && arr[(x + dx[k]) * m + (y + dy[k])] != -2)
+        //    {
+        //        //cout << distance << endl;
+        //        edges.push(Vector<edge>());
+        //        q.push({ {x + dx[k], y + dy[k]}, distance + 1 });
+        //        explored[(x + dx[k]) * m + (y + dy[k])] = true;
+        //    }
+        //}
     }
 
     return;
@@ -116,10 +135,10 @@ void get_city_name(const int n, const int m, const char* arr)
                         if ((j1 >= 0 && j1 < m && i1 >= 0 && i1 < n) && isalnum(arr[i1 * m + j1]))
                         {
                            city_name = name(n, m, arr, i1, j1);
-                        }
+                        } 
                     }
                 }
-                cout << city_name.get_str() << endl;
+               // cout << city_name.get_str() << endl;
             }
         }
     }
@@ -133,6 +152,8 @@ int main()
     cin >> n >> m;
 
     const auto arr = new char[n * m];
+
+    Vector<int> normal_array(n * m);
 
     const auto arr1 = new int[n * m];
 
@@ -154,27 +175,28 @@ int main()
         for (int j = 0; j < m; j++) {
             if (arr[i * m + j] == '*') {
                 arr1[i * m + j] = i * m + j;
+                normal_array[i * m + j] = i * m + j;
             }
             else if (arr[i * m + j] == '#') {
 
 	            arr1[i * m + j] = -1;
+                normal_array[i * m + j] = -1;
                 are_there_roads = true;
             }
             else
             {
                 arr1[i * m + j] = -2;
+                normal_array[i * m + j] = -2;
             }
         }
     }
 
-   /*for (int i = 0; i < n; i++) {
-   		for (int j = 0; j < m; j++) {
-   			cout << arr1[i * m + j];
-   		}
-   		cout << endl;
-   }*/
-
-    Vector<int> as;
+   //for (int i = 0; i < n; i++) {
+   //		for (int j = 0; j < m; j++) {
+   //			cout << normal_array[i * m + j] << " ";
+   //		}
+   //		cout << endl;
+   //}
 
    /* as.push(12);
     as.push(12);
@@ -193,8 +215,21 @@ int main()
 	    for( int j = 0; j < n; j++)
 	    {
             if(arr[i*m + j] == '*')
-            bfs(n, m, arr1, edges, i, j);
+            bfs(n, m, normal_array, edges, i, j);
 	    }
+    }
+
+    for (int i = 0; i < edges.get_size(); i++) {
+        if (edges[i].get_empty()) continue;
+
+        cout << "City : " << i << endl;
+        auto& neighbor = edges[i];
+
+        for (int j = 0; j < neighbor.get_size(); j++) {
+            cout << neighbor[j].city << " " << neighbor[j].distance << ", ";
+        }
+
+        cout << endl;
     }
 
    /* for( int i = 0; i < n; i++)
