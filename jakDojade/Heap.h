@@ -1,54 +1,103 @@
 #pragma once
-#include <iostream> 
+#include <iostream>
 
-using namespace std;
+#include "Vector.h"
 
-// heap
-int Parent(int i) { return (i - 1) / 2; }
-int Left(int i) { return i * 2 + 1; }
-int Right(int i) { return i * 2 + 2; }
+struct edge {
+	int city;
+	int distance;
+};
 
-// customowe porownywanie bo struktury
+class Heap
+{
+private:
+	Vector<edge> w_;
+	int size_ = -1;
 
-void Heapify(int* arr, int i, int size) {
-	int maxps;
-	int left = Left(i);
-	int right = Right(i);
+	int parent(const int i) { return (i - 1) / 2; }
+	int left(const int i) { return i * 2 + 1; }
+	int right(const int i) { return i * 2 + 2; }
 
-	if (left <= size && arr[left - 1] > arr[i - 1]) {
-		maxps = left;
+	void up_heap(int index)
+	{
+		while (index > 0)
+		{
+			if (w_[parent(index)].distance < w_[index].distance)
+			{
+				std::swap(w_[parent(index)], w_[index]);
+
+				index = parent(index);
+			}
+			else break;
+		}
 	}
-	else {
-		maxps = i;
+
+	void down_heap(const int index)
+	{
+		int max = index;
+		const int l = left(index), r = right(index);
+
+		if (l <= size_ && w_[l].distance < w_[max].distance) max = l;
+
+		if (r <= size_ && w_[r].distance < w_[max].distance) max = r;
+
+		if (index != max)
+		{
+			std::swap(w_[index], w_[max]);
+			down_heap(max);
+		}
+	}
+public:
+	[[nodiscard]] bool is_empty() const {
+		return size_ == -1;
 	}
 
-	if (right <= size && arr[right - 1] > arr[maxps - 1]) {
-		maxps = right;
+	[[nodiscard]] int size() const {
+		return size_ + 1;
 	}
-	if (maxps != i) {
-		swap(arr[i - 1], arr[maxps - 1]);
-		Heapify(arr, maxps, size);
+
+	void build_heap(const Vector<edge>& elements) {
+		w_ = elements;
+		size_ = elements.get_size() - 1;
+		 
+		for (int i = size_ / 2; i >= 0; i--) {
+			down_heap(i);
+		}
 	}
-}
 
-inline void bulid_heap(int* arr, int size) {
-	for (int i = size; i >= 0; i--) {
-		Heapify(arr, i, size);
+	edge get_top()
+	{
+		return { w_[0].city, w_[0].distance };
 	}
-}
 
-inline int heap_insert(int* arr, int size, int newEle) {
-	size = size + 1;
-	int i = size;
-	while (i > 1 && arr[Parent(i) - 1] < newEle) {
-		arr[i - 1] = arr[Parent(i) - 1];
-		i = Parent(i);
+
+	edge delete_top()
+	{
+		edge result = { w_[0].city, w_[0].distance };
+
+		w_[0].city = w_[size_].city;
+		w_[0].distance = w_[size_].distance;
+
+		size_--;
+
+		w_.pop_front();
+
+		down_heap(0);
+
+		return result;
 	}
-	arr[i - 1] = newEle;
 
-	return size;
-}
+	void insert(const edge e1)
+	{
+		w_.push(e1);
+		size_++;
+		down_heap(size_);
+	}
 
-class PriorityQueue {
-
+	void print_heap() {
+		for (int i = 0; i < w_.get_size(); i++) {
+			cout << "(" << w_[i].city << ", " << w_[i].distance << ") ";
+		}
+		cout << endl;
+	}
 };

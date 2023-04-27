@@ -136,6 +136,7 @@
   <ItemGroup>
     <ClInclude Include="HashTable.h" />
     <ClInclude Include="Heap.h" />
+    <ClInclude Include="PriorityQueue.h" />
     <ClInclude Include="Queue.h" />
     <ClInclude Include="String.h" />
     <ClInclude Include="Vector.h" />

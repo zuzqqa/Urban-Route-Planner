@@ -3,6 +3,7 @@
 #include "Vector.h"
 #include "String.h"
 #include "Queue.h"
+#include "Heap.h"
 
 constexpr int dx[] = { 0, 1, 0, -1 };
 constexpr int dy[] = { 1, 0, -1, 0 };
@@ -11,11 +12,6 @@ using namespace std;
 
 struct shift {
     int i, j;
-};
-
-struct edge {
-    int city;
-    int distance;
 };
 
 struct coord {
@@ -31,7 +27,6 @@ bool inside_map(const int i, const int j, const int w, const int h) {
     return i >= 0 && j >= 0 && j < w && i < h;
 }
 
-// :D
 void bfs(const int n, const int m, const Vector<int>& arr, Vector<Vector<edge>>& edges, const int i, const int j) {
     Vector<bool> explored(n * m);
 
@@ -84,7 +79,45 @@ void bfs(const int n, const int m, const Vector<int>& arr, Vector<Vector<edge>>&
     }
 
     return;
-};
+}
+
+Vector<int> dijkstra(const int n, const int m, Vector<Vector<edge>>& edges, int start_index)
+{
+    Heap min_heap;
+    Vector<int> distances(n * m);
+
+    for (int i = 0; i < n * m; i++) distances[i] = 1e9;
+
+    distances[start_index] = 0;
+    min_heap.insert({ start_index, 0 });
+
+    while (!min_heap.is_empty())
+    {
+        edge n1 = min_heap.get_top();
+
+        min_heap.print_heap();
+
+        cout << n1.city << " " << edges[n1.city].get_size() << endl;
+
+        auto& neighbor = edges[n1.city];
+
+        min_heap.delete_top();
+
+        for (int j = 0; j < neighbor.get_size(); j++) {
+            int edge_weight = neighbor[j].distance;
+            int adj_node = neighbor[j].city;
+
+            if (n1.distance + edge_weight < distances[adj_node])
+            {
+                distances[adj_node] = n1.distance + edge_weight;
+                min_heap.insert({ adj_node, distances[adj_node] });
+            }
+        }
+    }
+
+
+    return distances;
+}
 
 string_ name(const int n, const int m, const char* arr, const int i, int j)
 {
@@ -140,7 +173,7 @@ void get_city_name(const int n, const int m, const char* arr)
 
 int main()
 {
-    int n, m, c; char zn;
+    int n, m; char zn;
     Vector<Vector<edge>> edges;
 
     cin >> n >> m;
@@ -185,13 +218,12 @@ int main()
         }
     }
 
-    cout << arr1[3 * m + 8] << endl;
-   for (int i = 0; i < n; i++) {
-   		for (int j = 0; j < m; j++) {
-   			cout << normal_array[i * m + j] << " ";
-   		}
-   		cout << endl;
-   }
+   //for (int i = 0; i < n; i++) {
+   //		for (int j = 0; j < m; j++) {
+   //			cout << normal_array[i * m + j] << " ";
+   //		}
+   //		cout << endl;
+   //}
 
     for( int i = 0; i < m; i++)
     {
@@ -202,7 +234,7 @@ int main()
 	    }
     }
 
-    for (int i = 0; i < edges.get_size(); i++) {
+  /*  for (int i = 0; i < edges.get_size(); i++) {
         if (edges[i].get_empty()) continue;
 
         cout << "City : " << i << endl;
@@ -213,6 +245,31 @@ int main()
         }
 
         cout << endl;
+    }*/
+
+    Vector<edge> allEdges;
+    Heap heap;
+
+    // Step 4: Build the heap from the allEdges vector
+    heap.build_heap(allEdges);
+
+    
+   /* while(!heap.is_empty()){
+        edge element = heap.get_top();
+        std::cout << "City: " << element.city << ", Distance: " << element.distance << std::endl;
+        heap.delete_top();
+    }*/
+
+
+    Vector<int> najkrotszeTrasy = dijkstra(n, m, edges, 28);
+
+
+    auto& trast = najkrotszeTrasy;
+
+    for (int j = 0; j < najkrotszeTrasy.get_size(); j++) {
+        if (trast[j] == 1e9) continue;
+        cout << j << " " << trast[j]<<" ";
     }
+
 }
 

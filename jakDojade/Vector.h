@@ -17,7 +17,7 @@ public:
 
 	Vector(const Vector& second);
 
-	Vector(Vector&& second);
+	Vector(Vector&& second) noexcept;
 
 	~Vector();
 
@@ -115,7 +115,7 @@ Vector<T>::Vector(const Vector& second)
 }
 
 template <typename T>
-Vector<T>::Vector(Vector&& second): capacity_(std::move(second.capacity_)), size_(std::move(second.size_)), arr_(std::move(second.arr_))
+Vector<T>::Vector(Vector&& second) noexcept: capacity_(std::move(second.capacity_)), size_(std::move(second.size_)), arr_(std::move(second.arr_))
 {
 	second.size_ = 0;
 	second.arr_ = nullptr;
@@ -227,6 +227,7 @@ void Vector<T>::reserve(int new_capacity) {
 template <typename T>
 int Vector<T>::get_size() const
 { 
+
 	return size_; 
 }
 
@@ -245,15 +246,14 @@ bool Vector<T>::get_empty() const
 template <typename T>
 typename Vector<T>::Iterator Vector<T>::begin() const
 {
-	return Vector<T>::Iterator{ this, 0 };
+	return Iterator(this, 0);
 }
 
 template <typename T>
 typename Vector<T>::Iterator Vector<T>::end() const
 {
-	return Vector<T>::Iterator{ this, size_ };
+	return Iterator(this, size_);
 }
-
 // functions for iterator
 
 template <typename T>
@@ -263,7 +263,7 @@ Vector<T>::Iterator::Iterator(const Vector<T>* current_, int index_)
 template <typename T>
 const T& Vector<T>::Iterator::operator*() const
 {
-	return current_[index_];
+	return current_->arr_[index_];
 }
 
 template <typename T>
