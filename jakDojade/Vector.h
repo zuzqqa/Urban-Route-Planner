@@ -68,6 +68,8 @@ public:
 		bool operator==(const Iterator& other) const;
 
 		bool operator!=(const Iterator& other) const;
+
+		Vector<T>::Iterator operator->() const;
 	};
 
 	[[nodiscard]] Iterator begin() const;
@@ -180,8 +182,6 @@ void Vector<T>::push(T data)
 {
 
 	if (size_ >= capacity_) {
-		cout << capacity_ << endl;
-
 		T* temp = new T[2 * capacity_];
 
 		for (int i = 0; i < size_; i++) {

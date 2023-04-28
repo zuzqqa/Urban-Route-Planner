@@ -78,10 +78,7 @@ inline string_::string_(const char* str)
 inline string_& string_::operator=(const string_& other)
 {
 	if (this != &other) {
-
-		if (data_ != nullptr) {
-			data_ = nullptr;
-		}
+		delete[] data_;
 
 		size_ = other.size_;
 		data_ = new char[size_ + 1];
@@ -177,7 +174,4 @@ inline void string_::str_delete()
 
 inline string_::~string_()
 {
-	if (data_ != nullptr) {
-		data_ = nullptr;
-	}
 }

@@ -4,6 +4,7 @@
 #include "String.h"
 #include "Queue.h"
 #include "Heap.h"
+#include "HashMap1.h"
 
 constexpr int dx[] = { 0, 1, 0, -1 };
 constexpr int dy[] = { 1, 0, -1, 0 };
@@ -21,6 +22,13 @@ struct coord {
 struct Pair {
     coord location;
     int distance;
+};
+
+struct flight
+{
+    string_ destination;
+    string_ source;
+    int time;
 };
 
 bool inside_map(const int i, const int j, const int w, const int h) {
@@ -61,7 +69,6 @@ void bfs(const int n, const int m, const Vector<int>& arr, Vector<Vector<edge>>&
 
         // town
         if (arr[x * m + y] >= 0 && arr[x * m + y] != start_city) {
-            cout << "City found" << endl;
             edges[start_city].push({ arr[x * m + y], distance });
             continue;
         }
@@ -81,7 +88,7 @@ void bfs(const int n, const int m, const Vector<int>& arr, Vector<Vector<edge>>&
     return;
 }
 
-Vector<int> dijkstra(const int n, const int m, Vector<Vector<edge>>& edges, int start_index)
+int dijkstra(const int n, const int m, Vector<Vector<edge>>& edges, int start_index, int end_index)
 {
     Heap min_heap;
     Vector<int> distances(n * m);
@@ -96,8 +103,6 @@ Vector<int> dijkstra(const int n, const int m, Vector<Vector<edge>>& edges, int 
         edge n1 = min_heap.get_top();
 
         min_heap.print_heap();
-
-        cout << n1.city << " " << edges[n1.city].get_size() << endl;
 
         auto& neighbor = edges[n1.city];
 
@@ -115,8 +120,8 @@ Vector<int> dijkstra(const int n, const int m, Vector<Vector<edge>>& edges, int 
         }
     }
 
-
-    return distances;
+    cout << "DYSTANS " << distances[end_index] << endl;
+    return distances[end_index];
 }
 
 string_ name(const int n, const int m, const char* arr, const int i, int j)
@@ -150,7 +155,7 @@ string_ name(const int n, const int m, const char* arr, const int i, int j)
     return city_name;
 }
 
-void get_city_name(const int n, const int m, const char* arr)
+void get_city_name(const int n, const int m, const char* arr, Vector<int>& normal_array, HashMap_id& hash_id, HashMap_str& hash_city)
 {
 	for (int i = 0; i < n; i++) {
         for (int j = 0; j < m; j++) {
@@ -162,7 +167,11 @@ void get_city_name(const int n, const int m, const char* arr)
                     {
                         if ((j1 >= 0 && j1 < m && i1 >= 0 && i1 < n) && isalnum(arr[i1 * m + j1]))
                         {
-                           string_ city_name = name(n, m, arr, i1, j1);
+                            string_ city_name(name(n, m, arr, i1, j1));
+                        	hash_id.insert(normal_array[i * m + j], city_name);
+
+                            string_ city_name1(name(n, m, arr, i1, j1));
+                            hash_city.insert(city_name, normal_array[i * m + j]);
                         } 
                     }
                 }
@@ -171,12 +180,59 @@ void get_city_name(const int n, const int m, const char* arr)
     }
 }
 
+flight divide(Vector<Vector<edge>>& edges, string_ temp)
+{
+    int length = 0, buffer = 0;
+    Vector<string_> f1;
+    flight h;
+
+    cout << "Dlugosc nazwy miasta: " << temp.str_size() << endl;
+	for( int i = 0; i < temp.str_size(); i++)
+	{
+        if (temp[i] == ' ' || temp[i] == '\n') {
+            cout << "subs: " << temp.substr(buffer, length - 1).get_str() << endl;
+            f1.push(temp.substr(buffer, length));
+            cout << length << endl;
+            buffer = i + 1;
+        	length = 0;
+        }
+
+		length++;
+	}
+
+    return { f1[0], f1[1], atoi(f1[2].get_str())};
+}
+
+void add_flight(flight f1, Vector<Vector<edge>>& edges, HashMap_id& hash_id, HashMap_str& hash_city)
+{
+   
+    edge e1 = { hash_city.retrieve(f1.source), f1.time };
+    edge e2 = { hash_city.retrieve(f1.destination), f1.time };
+
+    edges[e2.city].push(e1);
+    edges[e1.city].push(e2);
+
+    return;
+}
+
+void get_queries(const int n, const int m, flight f1, Vector<Vector<edge>>& edges, HashMap_id& hash_id, HashMap_str& hash_city)
+{
+    int src = hash_city.retrieve(f1.source);
+    cout << "Source: " << endl;
+    int dest = hash_city.retrieve(f1.destination);
+    cout << "Destination: " << endl;
+    cout<<dijkstra(n, m, edges, src, dest);
+}
+
 int main()
 {
     int n, m; char zn;
     Vector<Vector<edge>> edges;
 
     cin >> n >> m;
+
+    HashMap_id hash_id;
+    HashMap_str hash_city;
 
     const auto arr = new char[n * m];
 
@@ -194,36 +250,26 @@ int main()
         }
     }
 
-    get_city_name(n, m, arr);
-
     bool are_there_roads = false;
 
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < m; j++) {
             if (arr[i * m + j] == '*') {
-                arr1[i * m + j] = i * m + j;
                 normal_array[i * m + j] = i * m + j;
             }
             else if (arr[i * m + j] == '#') {
-
-	            arr1[i * m + j] = -1;
                 normal_array[i * m + j] = -1;
                 are_there_roads = true;
             }
             else
             {
-                arr1[i * m + j] = -2;
                 normal_array[i * m + j] = -2;
             }
         }
     }
 
-   //for (int i = 0; i < n; i++) {
-   //		for (int j = 0; j < m; j++) {
-   //			cout << normal_array[i * m + j] << " ";
-   //		}
-   //		cout << endl;
-   //}
+    get_city_name(n, m, arr, normal_array, hash_id, hash_city);
+
 
     for( int i = 0; i < m; i++)
     {
@@ -234,41 +280,32 @@ int main()
 	    }
     }
 
-  /*  for (int i = 0; i < edges.get_size(); i++) {
-        if (edges[i].get_empty()) continue;
+    int k = 0; // liczba polaczen lotniczych
+    cin >> k;
 
-        cout << "City : " << i << endl;
-        auto& neighbor = edges[i];
+    int a = 0;
 
-        for (int j = 0; j < neighbor.get_size(); j++) {
-            cout << neighbor[j].city << " " << neighbor[j].distance << ", ";
-        }
+    flight h;
 
-        cout << endl;
-    }*/
+    char* wiersz = new char[64];
 
-    Vector<edge> allEdges;
-    Heap heap;
+    while (a < k && fgets(wiersz, 64, stdin)) {
+        string_ a_string(wiersz);
+        h = divide(edges, wiersz);
+        add_flight(h, edges, hash_id, hash_city);
+        a++;
+    }
 
-    // Step 4: Build the heap from the allEdges vector
-    heap.build_heap(allEdges);
+    a = 0;
 
-    
-   /* while(!heap.is_empty()){
-        edge element = heap.get_top();
-        std::cout << "City: " << element.city << ", Distance: " << element.distance << std::endl;
-        heap.delete_top();
-    }*/
+    int z = 0; // liczba zapytan
+    cin >> z;
 
-
-    Vector<int> najkrotszeTrasy = dijkstra(n, m, edges, 28);
-
-
-    auto& trast = najkrotszeTrasy;
-
-    for (int j = 0; j < najkrotszeTrasy.get_size(); j++) {
-        if (trast[j] == 1e9) continue;
-        cout << j << " " << trast[j]<<" ";
+    while (a <= z && fgets(wiersz, 64, stdin)) {
+        string_ a_string(wiersz);
+        h = divide(edges, wiersz);
+        get_queries(n, m, h, edges, hash_id, hash_city);
+        a++;
     }
 
 }
