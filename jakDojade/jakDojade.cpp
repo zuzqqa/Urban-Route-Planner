@@ -298,6 +298,7 @@ int main() {
   get_city_name(n, m, arr, normal_array, hash_id, hash_city, cities);
 
   auto start_time = chrono::high_resolution_clock::now();
+
   if (are_there_roads) {
     for (int i = 0; i < cities.get_size(); i++) {
       bfs(n, m, normal_array, edges, cities[i].i, cities[i].j);
@@ -308,8 +309,6 @@ int main() {
   auto result = std::chrono::duration_cast<std::chrono::milliseconds>(
                     end_time - start_time)
                     .count();
-
-  cout << "ile: " << result << endl;
 
   int k = 0;
   cin >> k;

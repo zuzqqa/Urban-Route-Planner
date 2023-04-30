@@ -9,7 +9,6 @@ constexpr int starting_hash = 5381;
 class HashMap_id
 {
 public:
-    // Node structure to hold key-value pairs
     struct Node
     {
         int city_id;
@@ -48,8 +47,7 @@ public:
         size_++;
     }
 
-    // Retrieve the value associated with a given key
-    string_ retrieve(const int key) const
+	string_ retrieve(const int key) const
     {
         const long long int h = hash(key);
 
@@ -111,8 +109,6 @@ private:
 class HashMap_str
 {
 public:
-
-    // Node structure to hold key-value pairs
     struct Node
     {
         string_ city_name;
@@ -149,7 +145,6 @@ public:
         size_++;
     }
 
-    // Retrieve the value associated with a given key
     [[nodiscard]] int retrieve(const string_& key)
     {
 		const long long int h = hash(key);
