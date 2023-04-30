@@ -16,7 +16,7 @@ public:
         Node* next{};
 
         Node() : city_id(0), city_name(nullptr), next(nullptr) {}
-        Node(int key, const string_& value) : city_id(key), city_name(value) {}
+        Node(const int key, const string_& value) : city_id(key), city_name(value) {}
     };
 
     HashMap_id()
@@ -28,26 +28,27 @@ public:
     {
         return key % prime;
     }
+
     void insert(const int key, const string_& value) {
         const long long int h = hash(key);
 
-        Node* newNode = new Node(key, value);
+        const auto new_node = new Node(key, value);
 
         if (buckets_[h] == nullptr) {
-            buckets_[h] = newNode;
+            buckets_[h] = new_node;
         }
         else {
             Node* current = buckets_[h];
             while (current->next != nullptr) {
                 current = current->next;
             }
-            current->next = newNode;
+            current->next = new_node;
         }
 
         size_++;
     }
 
-	string_ retrieve(const int key) const
+    [[nodiscard]] string_ retrieve(const int key) const
     {
         const long long int h = hash(key);
 
@@ -60,7 +61,7 @@ public:
             current = current->next;
         }
 
-        return string_();
+        return {};
     }
 
     [[nodiscard]] long long int get_size() const
@@ -76,7 +77,7 @@ private:
     static constexpr int initial_bucket_count = 10007;
     static constexpr int prime = 10007;
 
-    Node** buckets_;
+    Node** buckets_{};
     int size_ = 0;
 
     void allocate_buckets()
@@ -84,7 +85,7 @@ private:
         buckets_ = new Node * [initial_bucket_count]();
     }
 
-    void deallocate_buckets()
+    void deallocate_buckets() const
     {
         if (buckets_ != nullptr)
         {
@@ -93,7 +94,7 @@ private:
                 Node* current = buckets_[i];
                 while (current != nullptr)
                 {
-                    Node* temp = current;
+	                const Node* temp = current;
                     current = current->next;
                     delete temp;
                 }
@@ -116,14 +117,14 @@ public:
         Node* next;
 
         Node() : city_name(""), city_id(0), next(nullptr) {}  
-        Node(const string_& value, int key) : city_name(value), city_id(key), next(nullptr) {}
+        Node(const string_& value, const int key) : city_name(value), city_id(key), next(nullptr) {}
     };
 
     HashMap_str() {
         allocate_buckets();
     }
 
-	long long int hash(const string_& key)
+    static long long int hash(const string_& key)
     {
         long long int hash = starting_hash;
 
@@ -138,18 +139,18 @@ public:
     void insert(const string_& key, const int value) {
         const long long int h = hash(key);
 
-        Node* newNode = new Node(key, value);
-        newNode->next = buckets_[h];
-        buckets_[h] = newNode;
+        const auto new_node = new Node(key, value);
+        new_node->next = buckets_[h];
+        buckets_[h] = new_node;
 
         size_++;
     }
 
-    [[nodiscard]] int retrieve(const string_& key)
+    [[nodiscard]] int retrieve(const string_& key) const
     {
 		const long long int h = hash(key);
 
-        Node* current = buckets_[h];
+		const Node* current = buckets_[h];
 
         while(current!=nullptr)
         {
@@ -175,15 +176,15 @@ private:
     static constexpr int initial_bucket_count = 10007;
     static constexpr int prime = 201326611;
 
-    Node** buckets_;
-    long long int size_;
+    Node** buckets_{};
+    long long int size_{};
 
     void allocate_buckets()
     {
         buckets_ = new Node *[initial_bucket_count]();
     }
 
-    void deallocate_buckets()
+    void deallocate_buckets() const
     {
         if (buckets_ != nullptr)
         {
@@ -192,7 +193,7 @@ private:
                 Node* current = buckets_[i];
                 while (current != nullptr)
                 {
-                    Node* temp = current;
+	                const Node* temp = current;
                     current = current->next;
                     delete temp;
                 }

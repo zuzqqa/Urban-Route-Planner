@@ -14,9 +14,9 @@ string_::string_(const char* str)
 	size_ = 0;
 
 	if (str != nullptr) {
-		int length = strlen(str);
+		const size_t length = strlen(str);
 
-		auto str_data = new char[length + 1];
+		const auto str_data = new char[length + 1];
 
 		for (size_t i = 0, j = 0; i < length; i++) {
 			if (str[i] != '\n') {
@@ -51,7 +51,7 @@ string_& string_::operator=(const string_& other)
 }
 
 void string_::append(const char c) {
-	auto str_data = new char[size_ + 2];
+	const auto str_data = new char[size_ + 2];
 
 	if (data_ != nullptr)
 	{
@@ -70,7 +70,7 @@ void string_::append(const char c) {
 }
 
 void string_::flip() {
-	auto str_data = new char[size_];
+	const auto str_data = new char[size_];
 
 	if (data_ != nullptr)
 	{
@@ -113,13 +113,16 @@ int string_::str_size() const
 
 string_ string_::substr(const int buffer, const int length) const
 {
-	char* newString = new char[length + 1];
+	const auto new_string = new char[length + 1];
 
-	memcpy(newString, &data_[buffer], length);
+	memcpy(new_string, &data_[buffer], length);
+	new_string[length] = '\0';
 
-	newString[length] = '\0';
+	string_ result(new_string);
 
-	return { newString };
+	delete[] new_string;
+
+	return result;
 }
 
 void string_::str_delete()
@@ -134,4 +137,8 @@ void string_::str_delete()
 }
 
 string_::~string_()
-= default;
+{
+	if (data_ != nullptr) {
+		data_ = nullptr;
+	}
+}

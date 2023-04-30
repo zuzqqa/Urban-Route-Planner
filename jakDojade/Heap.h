@@ -14,9 +14,9 @@ private:
 	Vector<edge> w_;
 	int size_ = -1;
 
-	int parent(const int i) { return (i - 1) / 2; }
-	int left(const int i) { return i * 2 + 1; }
-	int right(const int i) { return i * 2 + 2; }
+	static int parent(const int i) { return (i - 1) / 2; }
+	static int left(const int i) { return i * 2 + 1; }
+	static int right(const int i) { return i * 2 + 2; }
 
 	void up_heap(int index)
 	{
@@ -48,6 +48,10 @@ private:
 		}
 	}
 public:
+	Heap() = default;
+
+	~Heap() = default;
+
 	[[nodiscard]] bool is_empty() const {
 		return size_ == -1;
 	}
@@ -73,7 +77,7 @@ public:
 
 	edge delete_top()
 	{
-		edge result = { w_[0].city, w_[0].distance };
+		const edge result = { w_[0].city, w_[0].distance };
 
 		w_[0].city = w_[size_].city;
 		w_[0].distance = w_[size_].distance;
@@ -94,7 +98,7 @@ public:
 		down_heap(size_);
 	}
 
-	void print_heap() {
+	void print_heap() const{
 		for (int i = 0; i < w_.get_size(); i++) {
 			cout << "(" << w_[i].city << ", " << w_[i].distance << ") ";
 		}

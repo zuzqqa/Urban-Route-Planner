@@ -5,15 +5,15 @@ using namespace std;
 template <typename T>
 class Vector
 {
-	int capacity_{};
-	int size_{};
+	size_t capacity_{};
+	size_t size_{};
 	T* arr_;
 public:
 	Vector();
 
-	Vector(const int size, const T& value);
+	Vector(const size_t size, const T& value);
 
-	Vector(const int size);
+	explicit Vector(const size_t size);
 
 	Vector(const Vector& second);
 
@@ -43,9 +43,9 @@ public:
 
 	void push(T data);
 
-	void print();
+	void print() const;
 
-	void reserve(int new_capacity);
+	void reserve(size_t new_capacity);
 
 	void reverse();
 
@@ -53,9 +53,9 @@ public:
 
 	T& get_back();
 
-	[[nodiscard]] int get_size() const;
+	[[nodiscard]] size_t get_size() const;
 
-	[[nodiscard]] int get_capacity() const;
+	[[nodiscard]] size_t get_capacity() const;
 
 	[[nodiscard]] bool get_empty() const;
 
@@ -89,7 +89,7 @@ Vector<T>::Vector() : capacity_(2), size_(0), arr_(new T[2])
 {}
 
 template <typename T>
-Vector<T>::Vector(const int size, const T& value) : capacity_(size), size_(size), arr_(new T[size])
+Vector<T>::Vector(const size_t size, const T& value) : capacity_(size), size_(size), arr_(new T[size])
 {
 	for (int i = 0; i < size; i++) {
 		arr_[i] = value;
@@ -97,7 +97,7 @@ Vector<T>::Vector(const int size, const T& value) : capacity_(size), size_(size)
 }
 
 template<typename T>
-inline Vector<T>::Vector(const int size)
+inline Vector<T>::Vector(const size_t size)
 {
 	this->arr_ = new T[size];
 	this->capacity_ = size;
@@ -132,6 +132,7 @@ template <typename T>
 Vector<T>::~Vector()
 {
 	delete[] arr_;
+	arr_ = nullptr;
 	size_ = 0;
 	capacity_ = 1;
 }
@@ -191,20 +192,20 @@ void Vector<T>::push(T data)
 {
 
 	if (size_ >= capacity_) {
-		T* temp = new T[2 * capacity_];
+		const size_t new_capacity = capacity_ * 2;
+
+		T* temp = new T[new_capacity];
 
 		for (int i = 0; i < size_; i++) {
 			temp[i] = arr_[i];
 		}
 
-		capacity_ = capacity_ * 2;
+		capacity_ = new_capacity;
 
-		swap(arr_, temp);
+		delete[] arr_;
 
-		delete[] temp;
+		arr_ = temp;
 	}
-
-	// push data at the back
 
 	arr_[size_] = data;
 	size_++;
@@ -212,14 +213,11 @@ void Vector<T>::push(T data)
 
 template <typename T>
 T& Vector<T>::get_back() {
-	if (size_ == 0) {
-		throw std::out_of_range("Vector is empty");
-	}
 	return arr_[size_ - 1];
 }
 
 template <typename T>
-void Vector<T>::print()
+void Vector<T>::print() const
 {
 	for (int i = 0; i < size_; i++) {
 		cout << arr_[i] << " ";
@@ -227,7 +225,7 @@ void Vector<T>::print()
 }
 
 template <typename T>
-void Vector<T>::reserve(int new_capacity) {
+void Vector<T>::reserve(size_t new_capacity) {
 	if (new_capacity > capacity_) {
 
 		T* new_data = new T[new_capacity];
@@ -245,30 +243,27 @@ template<typename T>
 void Vector<T>::reverse()
 {
 	int start = 0;
-	int end = size_ - 1;
+
+	size_t end = size_ - 1;
 
 	while (start < end)
 	{
-		// Swap elements at start and end indices
 		T temp = arr_[start];
 		arr_[start] = arr_[end];
 		arr_[end] = temp;
-
-		// Move the indices towards the center
 		start++;
 		end--;
 	}
 }
 
 template <typename T>
-int Vector<T>::get_size() const
+size_t Vector<T>::get_size() const
 {
-
 	return size_;
 }
 
 template <typename T>
-int Vector<T>::get_capacity() const
+size_t Vector<T>::get_capacity() const
 {
 	return capacity_;
 }
@@ -326,24 +321,20 @@ void Vector<T>::insert(int index, const T& data)
 {
 	if (index < 0 || index > size_)
 	{
-		// Invalid index
 		return;
 	}
 
 	if (size_ >= capacity_)
 	{
-		// Increase capacity if needed
 		int new_capacity = (capacity_ == 0) ? 1 : capacity_ * 2;
 		reserve(new_capacity);
 	}
 
-	// Shift elements to the right to make space for the new element
 	for (int i = size_ - 1; i >= index; i--)
 	{
 		arr_[i + 1] = arr_[i];
 	}
 
-	// Insert the new element at the specified index
 	arr_[index] = data;
 	size_++;
 }

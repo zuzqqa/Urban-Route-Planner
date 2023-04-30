@@ -38,12 +38,21 @@ bool inside_map(const int i, const int j, const int w, const int h) {
 }
 
 void bfs(const int n,
-         const int m,
-         const Vector<int>& arr,
-         Vector<Vector<edge>>& edges,
+    const int m,
+    const Vector<int>& arr,
+    Vector<Vector<edge>>& edges,
+    Vector<bool>& explored,
          const int i,
          const int j) {
-  Vector<bool> explored(n * m, false);
+
+    for( int i = 0; i < n; i++)
+    {
+	    for( int j = 0; j < m; j++)
+	    {
+            explored[i * m + j] = false;
+	    }
+    }
+
 
   const int start_city = arr[i * m + j];
 
@@ -62,7 +71,7 @@ void bfs(const int n,
 
     // town
     if (current_city >= 0 && current_city != start_city) {
-      edges[start_city].push({current_city, distance});
+      edges[start_city].push({current_city,  distance});
       continue;
     }
 
@@ -84,11 +93,10 @@ void bfs(const int n,
 void dijkstra(const int n,
               const int m,
               Vector<Vector<edge>>& edges,
-              int start_index,
-              int end_index,
-              bool path1,
-              HashMap_id& hash_id,
-              HashMap_str& hash_city) {
+              const int start_index,
+              const int end_index,
+              const bool path1,
+              const HashMap_id& hash_id) {
   Heap min_heap;
 
   Vector<int> distances(n * m, 1e9);
@@ -177,7 +185,7 @@ void get_city_name(const int n,
                    HashMap_id& hash_id,
                    HashMap_str& hash_city,
                    Vector<JiI>& cities) {
-  const int cities_size = cities.get_size();
+	const size_t cities_size = cities.get_size();
 
   for (int i = 0; i < cities_size; i++) {
     const int city_i = cities[i].i;
@@ -203,35 +211,49 @@ void get_city_name(const int n,
 
 flight divide(Vector<Vector<edge>>& edges, string_ temp) {
   int length = 0, buffer = 0;
-  Vector<string_> f1;
   flight h;
   int k = 0;
 
   for (int i = 0; i < temp.str_size(); i++) {
-    if (temp[i] == ' ') {
+    if (temp[i] == ' ' && k == 0) {
       length = i - buffer;
-      f1.push(temp.substr(buffer, length));
+      h.source = temp.substr(buffer, length);
       buffer = buffer + length + 1;
       length = 0;
       k++;
+      continue;
+    }
+    if(temp[i] == ' ' && k == 1)
+    {
+        length = i - buffer;
+        h.destination = temp.substr(buffer, length);
+        buffer = buffer + length + 1;
+        length = 0;
+        k++;
     }
     if (k == 2) {
       length = temp.str_size() - buffer;
-      f1.push(temp.substr(buffer, length));
+      h.time = atoi(temp.substr(buffer, length).get_str());
       break;
     }
-
     length++;
   }
 
-  return {f1[0], f1[1], atoi(f1[2].get_str())};
+  return h;
 }
 
-void add_flight(flight f1,
+void add_flight(flight& f1,
                 Vector<Vector<edge>>& edges,
                 HashMap_id& hash_id,
                 HashMap_str& hash_city) {
+
   const edge e2 = {hash_city.retrieve(f1.destination), f1.time};
+
+  const int source_index = hash_city.retrieve(f1.source);
+
+  if (source_index >= edges.get_size()) {
+      edges.reserve(source_index + 1);
+  }
 
   edges[hash_city.retrieve(f1.source)].push(e2);
 
@@ -240,15 +262,15 @@ void add_flight(flight f1,
 
 void get_queries(const int n,
                  const int m,
-                 flight f1,
+                 const flight& f1,
                  Vector<Vector<edge>>& edges,
-                 HashMap_id& hash_id,
-                 HashMap_str& hash_city) {
+                 const HashMap_id& hash_id,
+                 const HashMap_str& hash_city) {
   const int src = hash_city.retrieve(f1.source);
 
   const int dest = hash_city.retrieve(f1.destination);
 
-  dijkstra(n, m, edges, src, dest, f1.time, hash_id, hash_city);
+  dijkstra(n, m, edges, src, dest, f1.time, hash_id);
 }
 
 int main() {
@@ -266,7 +288,6 @@ int main() {
   Vector<JiI> cities;
 
   Vector<char> arr(m * n);
-
   Vector<int> normal_array(m * n);
 
   for (int i = 0; i < n; i++) {
@@ -297,18 +318,12 @@ int main() {
 
   get_city_name(n, m, arr, normal_array, hash_id, hash_city, cities);
 
-  auto start_time = chrono::high_resolution_clock::now();
-
   if (are_there_roads) {
+  	Vector<bool> explored(n * m);
     for (int i = 0; i < cities.get_size(); i++) {
-      bfs(n, m, normal_array, edges, cities[i].i, cities[i].j);
+      bfs(n, m, normal_array, edges, explored, cities[i].i, cities[i].j);
     }
   }
-
-  auto end_time = chrono::high_resolution_clock::now();
-  auto result = std::chrono::duration_cast<std::chrono::milliseconds>(
-                    end_time - start_time)
-                    .count();
 
   int k = 0;
   cin >> k;
@@ -317,7 +332,8 @@ int main() {
 
   flight h;
 
-  char* wiersz = new char[64];
+  const auto wiersz = new char[64];
+
   fgets(wiersz, 64, stdin);
 
   if (k == 0) {
@@ -332,7 +348,7 @@ int main() {
 
   a = 0;
 
-  int z = 0;  // liczba zapytan
+  int z = 0; 
   cin >> z;
 
   fgets(wiersz, 64, stdin);
@@ -343,4 +359,6 @@ int main() {
     get_queries(n, m, h, edges, hash_id, hash_city);
     a++;
   }
+
+  delete[] wiersz;
 }
