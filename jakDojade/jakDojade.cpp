@@ -5,9 +5,7 @@
 #include "Queue.h"
 #include "Heap.h"
 #include "HashMap1.h"
-
-constexpr int dx[] = { 0, 1, 0, -1 };
-constexpr int dy[] = { 1, 0, -1, 0 };
+#include <chrono>
 
 using namespace std;
 
@@ -24,62 +22,52 @@ struct Pair {
     int distance;
 };
 
+struct JiI
+{
+    int i;
+    int j;
+};
+
 struct flight
 {
-    string_ destination;
     string_ source;
+    string_ destination;
     int time;
 };
 
 bool inside_map(const int i, const int j, const int w, const int h) {
-    return i >= 0 && j >= 0 && j < w && i < h;
+    return i >= 0 && j >= 0 && j < h && i < w ;
 }
 
 void bfs(const int n, const int m, const Vector<int>& arr, Vector<Vector<edge>>& edges, const int i, const int j) {
-    Vector<bool> explored(n * m);
-
-    for(int i1 = 0; i1 < n; i1++)
-    {
-	    for(int j1 = 0; j1 < m; j1++)
-	    {
-            explored[i1 * m + j1] = false;
-	    }
-    }
+    Vector<bool> explored(n * m, false);
 
     const int start_city = arr[i * m + j];
 
-    edges.reserve(m * n);
-
     queue<Pair> q;
-
     q.push({{i, j}, 0});
-    explored[i * n + j] = true;
+    explored[i * m + j] = true;
 
-    Vector<edge> empty;
-
-    for (int o = 0; o < m * n; o++) {
-        edges.push(Vector<edge>());
-    }
+    constexpr int dx[] = { 0, 1, 0, -1 };
+    constexpr int dy[] = { 1, 0, -1, 0 };
 
     while (!q.empty()) {
         auto [location, distance] = q.front();
-        auto [x, y] = location;
-
         q.pop();
-
+        const auto [x, y] = location;
+        const int current_city = arr[x * m + y];
+   
         // town
-        if (arr[x * m + y] >= 0 && arr[x * m + y] != start_city) {
-            edges[start_city].push({ arr[x * m + y], distance });
+        if (current_city >= 0 && current_city != start_city) {
+            edges[start_city].push({ current_city, distance });
             continue;
         }
 
         for (int k = 0; k < 4; k++) {
             const int new_i = x + dx[k];
             const int new_j = y + dy[k];
-            if (!inside_map(new_i, new_j, n, m)) continue;
-            if (arr[new_i * m + new_j] == -2) continue;
-            if (explored[new_i * m + new_j]) continue;
 
+            if (!inside_map(new_i, new_j, n, m) || arr[new_i * m + new_j] == -2 || explored[new_i * m + new_j]) continue;
             q.push({ {new_i, new_j}, distance + 1 });
             explored[new_i * m + new_j] = true;
         }
@@ -88,12 +76,14 @@ void bfs(const int n, const int m, const Vector<int>& arr, Vector<Vector<edge>>&
     return;
 }
 
-int dijkstra(const int n, const int m, Vector<Vector<edge>>& edges, int start_index, int end_index)
+void dijkstra(const int n, const int m, Vector<Vector<edge>>& edges, int start_index, int end_index, bool path1, HashMap_id& hash_id, HashMap_str& hash_city)
 {
-    Heap min_heap;
-    Vector<int> distances(n * m);
 
-    for (int i = 0; i < n * m; i++) distances[i] = 1e9;
+    Heap min_heap;
+
+    Vector<int> distances(n * m, 1e9);
+
+	Vector<int> previous( n * m);
 
     distances[start_index] = 0;
     min_heap.insert({ start_index, 0 });
@@ -101,8 +91,6 @@ int dijkstra(const int n, const int m, Vector<Vector<edge>>& edges, int start_in
     while (!min_heap.is_empty())
     {
         edge n1 = min_heap.get_top();
-
-        min_heap.print_heap();
 
         auto& neighbor = edges[n1.city];
 
@@ -115,39 +103,68 @@ int dijkstra(const int n, const int m, Vector<Vector<edge>>& edges, int start_in
             if (n1.distance + edge_weight < distances[adj_node])
             {
                 distances[adj_node] = n1.distance + edge_weight;
+                previous[adj_node] = (n1.city);
                 min_heap.insert({ adj_node, distances[adj_node] });
             }
         }
     }
 
-    cout << "DYSTANS " << distances[end_index] << endl;
-    return distances[end_index];
+
+    if( path1 == false )
+    {
+        cout << distances[end_index] << endl;
+    }
+    else
+    {
+        cout << distances[end_index] << " ";
+
+        Vector<int> path;
+        int current_node = end_index;
+
+        while (current_node != start_index)
+        {
+            path.push(current_node);
+            current_node = previous[current_node];
+        }
+
+        path.push(start_index); 
+        path.reverse();
+
+        for (int i = 0; i < path.get_size(); i++)
+        {
+        	if( path[i] != start_index && path[i] != end_index ) 
+                cout << hash_id.retrieve(path[i]).get_str()<< " ";
+        }
+        cout << endl;
+    }
+    
+    return;
 }
 
-string_ name(const int n, const int m, const char* arr, const int i, int j)
+string_ name(const int m, const int n, Vector<char>& arr, const int i, int j)
 {
     string_ city_name;
 
     int j1 = j;
 
-    if( j - 1 >= 0 && isalnum(arr[i * m + (j - 1)]))
+    if( j - 1 >= 0 && isalnum(arr[i * n + (j - 1)]))
     {
         j--;
-        while (j >= 0 && isalnum(arr[i * m + j]))
+        while (j >= 0 && isalnum(arr[i * n + j]))
         {
-            city_name.append(arr[i * m + j]);
+            city_name.append(arr[i * n + j]);
             j--;
         }
         city_name.flip();
     }
 
-    city_name.append(arr[i * m + j1]);
+    city_name.append(arr[i * n + j1]);
 
-    if(j1 + 1 < n && isalnum(arr[i * m + j1 + 1])){
+    if(j1 + 1 < n && isalnum(arr[i * n + j1 + 1])){
         j1++;
-        while (j1 < n && isalnum(arr[i * m + j1]))
+        while (j1 < n && isalnum(arr[i * n + j1]))
         {
-            city_name.append(arr[i * m + j1]);
+            city_name.append(arr[i * n + j1]);
             j1++;
         }
     }
@@ -155,29 +172,33 @@ string_ name(const int n, const int m, const char* arr, const int i, int j)
     return city_name;
 }
 
-void get_city_name(const int n, const int m, const char* arr, Vector<int>& normal_array, HashMap_id& hash_id, HashMap_str& hash_city)
+void get_city_name(const int n, const int m, Vector<char>& arr, Vector<int>& normal_array, HashMap_id& hash_id, HashMap_str& hash_city, Vector<JiI>& cities)
 {
-	for (int i = 0; i < n; i++) {
-        for (int j = 0; j < m; j++) {
-            if (arr[i * m + j] == '*')
-            {
-                for (int i1 = i - 1; i1 <= i + 1; i1++)
-                {
-                    for (int j1 = j - 1; j1 <= j + 1; j1++)
-                    {
-                        if ((j1 >= 0 && j1 < m && i1 >= 0 && i1 < n) && isalnum(arr[i1 * m + j1]))
-                        {
-                            string_ city_name(name(n, m, arr, i1, j1));
-                        	hash_id.insert(normal_array[i * m + j], city_name);
+	const int cities_size = cities.get_size();
 
-                            string_ city_name1(name(n, m, arr, i1, j1));
-                            hash_city.insert(city_name, normal_array[i * m + j]);
-                        } 
-                    }
+    for (int i = 0; i < cities_size; i++)
+    {
+	    const int city_i = cities[i].i;
+        const int city_j = cities[i].j;
+
+        const int start_index = city_i * m + city_j;
+	    const int normal_array_value = normal_array[start_index];
+
+        for (int i1 = city_i - 1; i1 <= city_i + 1; i1++)
+        {
+            for (int j1 = city_j - 1; j1 <= city_j + 1; j1++)
+            {
+                if ((j1 >= 0 && j1 < m && i1 >= 0 && i1 < n) && isalnum(arr[i1 * m + j1]))
+                {
+                    string_ city_name = name(n, m, arr, i1, j1);
+
+                    hash_id.insert(normal_array_value, city_name);
+                    hash_city.insert(city_name, normal_array_value);
+                    break;
                 }
             }
         }
-    }
+    };
 }
 
 flight divide(Vector<Vector<edge>>& edges, string_ temp)
@@ -185,18 +206,24 @@ flight divide(Vector<Vector<edge>>& edges, string_ temp)
     int length = 0, buffer = 0;
     Vector<string_> f1;
     flight h;
+    int k = 0;
 
-    cout << "Dlugosc nazwy miasta: " << temp.str_size() << endl;
 	for( int i = 0; i < temp.str_size(); i++)
 	{
-        if (temp[i] == ' ' || temp[i] == '\n') {
-            cout << "subs: " << temp.substr(buffer, length - 1).get_str() << endl;
+        if (temp[i] == ' ') {
+            length = i - buffer;
             f1.push(temp.substr(buffer, length));
-            cout << length << endl;
-            buffer = i + 1;
+            buffer = buffer + length + 1;
         	length = 0;
+            k++;
         }
-
+        if (k == 2)
+        {
+            length = temp.str_size() - buffer;
+            f1.push(temp.substr(buffer, length));
+            break;
+        }
+        
 		length++;
 	}
 
@@ -205,40 +232,39 @@ flight divide(Vector<Vector<edge>>& edges, string_ temp)
 
 void add_flight(flight f1, Vector<Vector<edge>>& edges, HashMap_id& hash_id, HashMap_str& hash_city)
 {
-   
-    edge e1 = { hash_city.retrieve(f1.source), f1.time };
-    edge e2 = { hash_city.retrieve(f1.destination), f1.time };
+	const edge e2 = { hash_city.retrieve(f1.destination), f1.time };
 
-    edges[e2.city].push(e1);
-    edges[e1.city].push(e2);
+    edges[hash_city.retrieve(f1.source)].push(e2);
 
     return;
 }
 
 void get_queries(const int n, const int m, flight f1, Vector<Vector<edge>>& edges, HashMap_id& hash_id, HashMap_str& hash_city)
 {
-    int src = hash_city.retrieve(f1.source);
-    cout << "Source: " << endl;
-    int dest = hash_city.retrieve(f1.destination);
-    cout << "Destination: " << endl;
-    cout<<dijkstra(n, m, edges, src, dest);
+	const int src = hash_city.retrieve(f1.source);
+
+	const int dest = hash_city.retrieve(f1.destination);
+
+	dijkstra(n, m, edges, src, dest, f1.time, hash_id, hash_city);
+
 }
 
 int main()
 {
     int n, m; char zn;
-    Vector<Vector<edge>> edges;
 
-    cin >> n >> m;
+    cin >> m >> n;
+
+    Vector<Vector<edge>> edges(m * n, Vector<edge>());
 
     HashMap_id hash_id;
     HashMap_str hash_city;
 
-    const auto arr = new char[n * m];
+    Vector<JiI> cities;
 
-    Vector<int> normal_array(n * m);
+    Vector<char> arr(m * n);
 
-    const auto arr1 = new int[n * m];
+    Vector<int> normal_array(m * n);
 
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < m; j++) {
@@ -256,6 +282,7 @@ int main()
         for (int j = 0; j < m; j++) {
             if (arr[i * m + j] == '*') {
                 normal_array[i * m + j] = i * m + j;
+                cities.push({i, j});
             }
             else if (arr[i * m + j] == '#') {
                 normal_array[i * m + j] = -1;
@@ -268,19 +295,21 @@ int main()
         }
     }
 
-    get_city_name(n, m, arr, normal_array, hash_id, hash_city);
 
+    get_city_name(n, m, arr, normal_array, hash_id, hash_city, cities);
 
-    for( int i = 0; i < m; i++)
+    auto start_time = chrono::high_resolution_clock::now();
+
+    for( int i = 0; i < cities.get_size(); i++)
     {
-	    for( int j = 0; j < n; j++)
-	    {
-            if(arr[i*m + j] == '*')
-            bfs(n, m, normal_array, edges, i, j);
-	    }
+        bfs(n, m, normal_array, edges, cities[i].i, cities[i].j);
     }
+    auto end_time = chrono::high_resolution_clock::now();
+    auto result = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
 
-    int k = 0; // liczba polaczen lotniczych
+    cout << "ile: " << result << endl;
+
+    int k = 0;
     cin >> k;
 
     int a = 0;
@@ -288,25 +317,32 @@ int main()
     flight h;
 
     char* wiersz = new char[64];
+    fgets(wiersz, 64, stdin);
 
-    while (a < k && fgets(wiersz, 64, stdin)) {
-        string_ a_string(wiersz);
-        h = divide(edges, wiersz);
-        add_flight(h, edges, hash_id, hash_city);
-        a++;
+    if (k == 0) {}
+    else
+    {
+        while ( a < k) {
+            fgets(wiersz, 64, stdin);
+            h = divide(edges, wiersz);
+            add_flight(h, edges, hash_id, hash_city);
+            a++;
+        }
     }
+   
 
     a = 0;
 
     int z = 0; // liczba zapytan
     cin >> z;
 
-    while (a <= z && fgets(wiersz, 64, stdin)) {
-        string_ a_string(wiersz);
+    fgets(wiersz, 64, stdin);
+
+    while (a < z) {
+        fgets(wiersz, 64, stdin);
         h = divide(edges, wiersz);
         get_queries(n, m, h, edges, hash_id, hash_city);
         a++;
     }
-
 }
 

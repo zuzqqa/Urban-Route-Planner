@@ -18,11 +18,11 @@
     <ClCompile Include="jakDojade.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="String.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="HashTable.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Vector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -33,9 +33,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="String.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PriorityQueue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="HashMap1.h">

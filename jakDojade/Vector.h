@@ -47,6 +47,12 @@ public:
 
 	void reserve(int new_capacity);
 
+	void reverse();
+
+	void insert(int index, const T& data);
+
+	T& get_back();
+
 	[[nodiscard]] int get_size() const;
 
 	[[nodiscard]] int get_capacity() const;
@@ -77,14 +83,13 @@ public:
 	[[nodiscard]] Iterator end() const;
 };
 
-// functions for vector
 
 template <typename T>
-Vector<T>::Vector(): capacity_(10), size_(0), arr_(new T[10])
+Vector<T>::Vector() : capacity_(2), size_(0), arr_(new T[2])
 {}
 
 template <typename T>
-Vector<T>::Vector(const int size, const T& value): capacity_(size), size_(size), arr_(new T[size])
+Vector<T>::Vector(const int size, const T& value) : capacity_(size), size_(size), arr_(new T[size])
 {
 	for (int i = 0; i < size; i++) {
 		arr_[i] = value;
@@ -117,7 +122,7 @@ Vector<T>::Vector(const Vector& second)
 }
 
 template <typename T>
-Vector<T>::Vector(Vector&& second) noexcept: capacity_(std::move(second.capacity_)), size_(std::move(second.size_)), arr_(std::move(second.arr_))
+Vector<T>::Vector(Vector&& second) noexcept : capacity_(std::move(second.capacity_)), size_(std::move(second.size_)), arr_(std::move(second.arr_))
 {
 	second.size_ = 0;
 	second.arr_ = nullptr;
@@ -151,6 +156,8 @@ Vector<T>& Vector<T>::operator=(const Vector& second)
 		size_ = second.size_;
 		capacity_ = second.capacity_;
 
+		delete[] arr_;
+
 		arr_ = new T[capacity_];
 
 		for (int i = 0; i < size_; i++) {
@@ -163,7 +170,9 @@ Vector<T>& Vector<T>::operator=(const Vector& second)
 
 template <typename T>
 void Vector<T>::pop()
-{ size_--; }
+{
+	size_--;
+}
 
 template <typename T>
 void Vector<T>::pop_front()
@@ -202,6 +211,14 @@ void Vector<T>::push(T data)
 }
 
 template <typename T>
+T& Vector<T>::get_back() {
+	if (size_ == 0) {
+		throw std::out_of_range("Vector is empty");
+	}
+	return arr_[size_ - 1];
+}
+
+template <typename T>
 void Vector<T>::print()
 {
 	for (int i = 0; i < size_; i++) {
@@ -224,17 +241,36 @@ void Vector<T>::reserve(int new_capacity) {
 	}
 }
 
+template<typename T>
+void Vector<T>::reverse()
+{
+	int start = 0;
+	int end = size_ - 1;
+
+	while (start < end)
+	{
+		// Swap elements at start and end indices
+		T temp = arr_[start];
+		arr_[start] = arr_[end];
+		arr_[end] = temp;
+
+		// Move the indices towards the center
+		start++;
+		end--;
+	}
+}
+
 template <typename T>
 int Vector<T>::get_size() const
-{ 
+{
 
-	return size_; 
+	return size_;
 }
 
 template <typename T>
 int Vector<T>::get_capacity() const
 {
-	return capacity_; 
+	return capacity_;
 }
 
 template <typename T>
@@ -283,4 +319,31 @@ template <typename T>
 bool Vector<T>::Iterator::operator!=(const Iterator& other) const
 {
 	return current_ != other.current_;
+}
+
+template <typename T>
+void Vector<T>::insert(int index, const T& data)
+{
+	if (index < 0 || index > size_)
+	{
+		// Invalid index
+		return;
+	}
+
+	if (size_ >= capacity_)
+	{
+		// Increase capacity if needed
+		int new_capacity = (capacity_ == 0) ? 1 : capacity_ * 2;
+		reserve(new_capacity);
+	}
+
+	// Shift elements to the right to make space for the new element
+	for (int i = size_ - 1; i >= index; i--)
+	{
+		arr_[i + 1] = arr_[i];
+	}
+
+	// Insert the new element at the specified index
+	arr_[index] = data;
+	size_++;
 }

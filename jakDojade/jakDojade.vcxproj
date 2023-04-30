@@ -132,12 +132,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="jakDojade.cpp" />
+    <ClCompile Include="String.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="HashMap1.h" />
-    <ClInclude Include="HashTable.h" />
     <ClInclude Include="Heap.h" />
-    <ClInclude Include="PriorityQueue.h" />
     <ClInclude Include="Queue.h" />
     <ClInclude Include="String.h" />
     <ClInclude Include="Vector.h" />
